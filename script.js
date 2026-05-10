@@ -1,10 +1,10 @@
-// Firebase v11 SDK 불러오기
-import { initializeApp } from "[https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js](https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js)";
-import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "[https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js](https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js)";
-import { getFirestore, collection, onSnapshot, doc, setDoc } from "[https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js](https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js)";
+// Firebase v11 SDK 불러오기 (주소 앞뒤에 괄호가 없어야 합니다)
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+import { getFirestore, collection, onSnapshot, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
 // =========================================================================
-// [필독] 아래 firebaseConfig 영역에 본인의 Firebase 설정값을 덮어씌워주세요!
+// [필독] 아래 영역에 본인의 Firebase 설정값을 정확히 입력해 주세요.
 // =========================================================================
 let firebaseConfig = {
     // Cloudflare 등에 배포할 때 아래 속성들을 본인의 키값으로 변경해야 작동합니다.
@@ -16,7 +16,7 @@ let firebaseConfig = {
     appId: "1:345093306604:web:255938adf03ca79c428dc9",
     measurementId: "G-E0JGHSKX0F"
 };
-let appId = "maze-collab-prod"; // DB 데이터를 구분할 고유 아이디
+let appId = "maze-collab-prod"; 
 
 // (참고: 로컬/캔버스 환경 자동 대응 로직 - 수정 불필요)
 if (typeof __firebase_config !== 'undefined') {
