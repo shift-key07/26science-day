@@ -1,13 +1,12 @@
-// Firebase v11 SDK 불러오기 (주소 앞뒤에 괄호가 없어야 합니다)
+// Firebase v11 SDK 불러오기
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
 import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 import { getFirestore, collection, onSnapshot, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
 // =========================================================================
-// [필독] 아래 영역에 본인의 Firebase 설정값을 정확히 입력해 주세요.
+// [필독] 이 부분에 반드시 아까 확인하신 파이어베이스 키값들을 다시 넣어주세요!
 // =========================================================================
 let firebaseConfig = {
-    // Cloudflare 등에 배포할 때 아래 속성들을 본인의 키값으로 변경해야 작동합니다.
     apiKey: "AIzaSyDXE9crFnp8--aOmgcMikdbAcWyJb3ybrU",
     authDomain: "science-day-2c70e.firebaseapp.com",
     projectId: "science-day-2c70e",
@@ -16,7 +15,7 @@ let firebaseConfig = {
     appId: "1:345093306604:web:255938adf03ca79c428dc9",
     measurementId: "G-E0JGHSKX0F"
 };
-let appId = "maze-collab-prod"; 
+let appId = "maze-collab-prod"; // DB 데이터를 구분할 고유 아이디
 
 // (참고: 로컬/캔버스 환경 자동 대응 로직 - 수정 불필요)
 if (typeof __firebase_config !== 'undefined') {
@@ -119,7 +118,7 @@ function startRealtimeSync() {
     });
 }
 
-// === 이하 그리기, 알고리즘 로직 (기존과 거의 동일) ===
+// === 이하 그리기, 알고리즘 로직 ===
 const editorModal = document.getElementById('editorModal');
 const modalTitle = document.getElementById('modalTitle');
 const editorCanvas = document.getElementById('editorCanvas');
@@ -277,12 +276,10 @@ function initGrid() {
             <span class="absolute top-2 left-2 text-gray-400 font-black text-lg z-10 group-hover:text-indigo-500">${i + 1}</span>
             <canvas id="thumb-${i}" width="200" height="200" class="w-full h-full object-contain absolute inset-0"></canvas>
             
-            <!-- 기본 편집 버튼 -->
             <div id="edit-btn-${i}" class="opacity-0 group-hover:opacity-100 absolute inset-0 bg-indigo-500/10 flex items-center justify-center transition-opacity z-20 pointer-events-none">
                 <span class="bg-indigo-600 text-white px-3 py-1 rounded-full text-sm font-bold shadow pointer-events-auto">편집</span>
             </div>
 
-            <!-- 잠금(Lock) 오버레이 -->
             <div id="lock-overlay-${i}" class="hidden absolute inset-0 bg-gray-900/60 flex flex-col items-center justify-center z-30 transition-opacity">
                 <span class="text-3xl mb-1">🔒</span>
                 <span class="text-white text-xs font-bold bg-black/60 px-2 py-1 rounded">다른 사용자가 편집 중</span>
@@ -316,7 +313,7 @@ async function openEditor(idx) {
 
     currentCell = idx;
     
-    // Firestore에 구역 잠금 상태 기록 (트랜잭션)
+    // Firestore에 구역 잠금 상태 기록
     try {
         const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'mazecells', idx.toString());
         await setDoc(docRef, { isLocked: true, lockedBy: currentUser.uid }, { merge: true });
@@ -454,7 +451,7 @@ window.addEventListener('beforeunload', () => {
     }
 });
 
-// 전체 미로 병합 및 다운로드 (경계선 옵션 포함)
+// 전체 미로 병합 및 다운로드 (경계선 옵션 포함 + 24개 개별 다운로드)
 document.getElementById('downloadMergedBtn').addEventListener('click', () => {
     const offscreen = document.createElement('canvas');
     offscreen.width = 1200; offscreen.height = 800; 
@@ -474,8 +471,39 @@ document.getElementById('downloadMergedBtn').addEventListener('click', () => {
         if (includeBorders) offCtx.strokeRect(xPos, yPos, 200, 200);
     }
 
+    // 1. 전체 병합 이미지 먼저 다운로드
     const link = document.createElement('a');
     link.download = 'snake_maze_multiplayer_1200x800.png';
     link.href = offscreen.toDataURL('image/png');
     link.click();
+
+    // 토스트 메시지로 다중 다운로드 안내
+    showToast("전체 이미지와 24개의 개별 이미지 다운로드를 시작합니다. (상단의 '여러 파일 다운로드' 팝업을 허용해주세요!)", false);
+
+    // 2. 24개의 개별 칸 이미지를 0.2초 간격으로 순차적 다운로드
+    for(let i = 0; i < 24; i++) {
+        setTimeout(() => {
+            const tCanvas = document.getElementById(`thumb-${i}`);
+            const singleLink = document.createElement('a');
+            
+            // 개별 다운로드 이미지에도 경계선 설정 상태를 똑같이 반영하기 위해 임시 캔버스 사용
+            const singleOffscreen = document.createElement('canvas');
+            singleOffscreen.width = 200; singleOffscreen.height = 200;
+            const singleCtx = singleOffscreen.getContext('2d');
+            singleCtx.drawImage(tCanvas, 0, 0);
+            
+            if (includeBorders) {
+                singleCtx.strokeStyle = '#9CA3AF'; 
+                singleCtx.lineWidth = 2;
+                singleCtx.strokeRect(0, 0, 200, 200);
+            }
+
+            // 파일 이름: maze_cell_01.png ~ maze_cell_24.png
+            const cellNumber = String(i + 1).padStart(2, '0');
+            singleLink.download = `maze_cell_${cellNumber}.png`; 
+            singleLink.href = singleOffscreen.toDataURL('image/png');
+            singleLink.click();
+            
+        }, (i + 1) * 200); // i번째 파일마다 200ms(0.2초)씩 딜레이 추가
+    }
 });
