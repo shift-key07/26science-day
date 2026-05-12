@@ -189,7 +189,7 @@ function redrawCanvas() {
     editorCtx.fillRect(0, 0, 400, 400);
     editorCtx.strokeStyle = '#1F2937';
     // 선 굵기를 12에서 6으로 얇게 변경, 끝을 각지게(square) 변경
-    editorCtx.lineWidth = 6;
+    editorCtx.lineWidth = 3;
     editorCtx.lineCap = 'square';
 
     for (const stroke of currentStrokes) {
@@ -210,7 +210,7 @@ function validatePathConnection() {
     tempCtx.fillStyle = 'white';
     tempCtx.fillRect(0, 0, 400, 400);
     // 검증용 캔버스에도 동일한 선 스타일 적용
-    tempCtx.strokeStyle = '#1F2937'; tempCtx.lineWidth = 6; tempCtx.lineCap = 'square';
+    tempCtx.strokeStyle = '#1F2937'; tempCtx.lineWidth = 3; tempCtx.lineCap = 'square';
     
     for (const stroke of currentStrokes) {
         tempCtx.beginPath();
@@ -388,7 +388,7 @@ function draw(e) {
         redrawCanvas(); 
         editorCtx.beginPath(); editorCtx.moveTo(startX, startY); editorCtx.lineTo(pos.x, pos.y);
         // 선 굵기를 12에서 6으로 얇게 변경, 끝을 각지게(square) 변경
-        editorCtx.strokeStyle = '#1F2937'; editorCtx.lineWidth = 6; editorCtx.lineCap = 'square'; editorCtx.stroke();
+        editorCtx.strokeStyle = '#1F2937'; editorCtx.lineWidth = 3; editorCtx.lineCap = 'square'; editorCtx.stroke();
     }
 }
 
